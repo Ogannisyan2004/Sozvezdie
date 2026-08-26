@@ -1,0 +1,2529 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Ты — моё созвездие ✨</title>
+
+<style>
+
+:root{
+  --bg:#030611;
+  --pink:#ffd6ee;
+  --violet:#c9b7ff;
+  --white:#fff;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+}
+
+body{
+  font-family:Georgia,"Times New Roman",serif;
+  color:white;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+.vignette{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+
+  background:
+    radial-gradient(
+      circle at 50% 43%,
+      transparent 0 35%,
+      rgba(0,0,0,.18) 64%,
+      rgba(0,0,0,.74) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(4,6,18,.18),
+      rgba(2,3,10,.46)
+    );
+}
+
+
+/* =========================================================
+   ОСНОВНОЙ ИНТЕРФЕЙС
+========================================================= */
+
+.ui{
+  position:fixed;
+  inset:0;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  pointer-events:none;
+  text-align:center;
+
+  padding:24px;
+}
+
+.intro{
+  max-width:760px;
+
+  transition:
+    opacity .8s ease,
+    transform .8s ease;
+}
+
+.kicker{
+  margin-bottom:18px;
+
+  font:
+    600 11px/1.2 Arial,sans-serif;
+
+  letter-spacing:.34em;
+  text-transform:uppercase;
+
+  color:rgba(255,255,255,.62);
+}
+
+h1{
+  margin:0;
+
+  font-size:clamp(38px,7vw,78px);
+  line-height:.98;
+  font-weight:400;
+
+  text-shadow:
+    0 0 30px rgba(201,183,255,.25);
+}
+
+.sub{
+  max-width:560px;
+
+  margin:22px auto 28px;
+
+  font-size:clamp(16px,2.2vw,21px);
+  line-height:1.55;
+
+  color:rgba(255,255,255,.72);
+}
+
+
+/* =========================================================
+   КНОПКИ
+========================================================= */
+
+button{
+  pointer-events:auto;
+
+  border:1px solid rgba(255,255,255,.24);
+
+  background:rgba(255,255,255,.08);
+
+  color:white;
+
+  padding:14px 24px;
+
+  border-radius:999px;
+
+  font:
+    600 12px Arial,sans-serif;
+
+  letter-spacing:.14em;
+  text-transform:uppercase;
+
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+
+  cursor:pointer;
+
+  box-shadow:
+    0 0 30px rgba(188,165,255,.08);
+
+  transition:
+    background .25s,
+    transform .25s,
+    box-shadow .25s;
+}
+
+button:hover{
+  background:rgba(255,255,255,.15);
+
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 0 40px rgba(221,192,255,.18);
+}
+
+button:active{
+  transform:scale(.97);
+}
+
+
+/* =========================================================
+   ПОДСКАЗКА
+========================================================= */
+
+.hint{
+  position:fixed;
+
+  left:50%;
+  bottom:26px;
+
+  transform:translateX(-50%);
+
+  font:
+    11px Arial,sans-serif;
+
+  letter-spacing:.16em;
+  text-transform:uppercase;
+
+  color:rgba(255,255,255,.52);
+
+  opacity:0;
+
+  transition:opacity 1s;
+
+  white-space:nowrap;
+
+  pointer-events:none;
+}
+
+
+/* =========================================================
+   ФИНАЛЬНОЕ СООБЩЕНИЕ
+========================================================= */
+
+.message{
+  position:fixed;
+
+  left:50%;
+  top:76%;
+
+  transform:translate(-50%,-50%);
+
+  width:min(760px,calc(100% - 40px));
+
+  text-align:center;
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:
+    opacity 1.3s ease,
+    transform 1.3s ease;
+}
+
+.message .small{
+  margin-bottom:12px;
+
+  font:
+    11px Arial,sans-serif;
+
+  letter-spacing:.3em;
+  text-transform:uppercase;
+
+  color:rgba(255,255,255,.6);
+}
+
+.message h2{
+  margin:0;
+
+  font-size:clamp(27px,4.4vw,52px);
+
+  font-weight:400;
+
+  line-height:1.08;
+
+  text-shadow:
+    0 0 35px rgba(255,205,237,.25);
+}
+
+.message p{
+  max-width:600px;
+
+  margin:14px auto 0;
+
+  font-size:clamp(14px,1.8vw,19px);
+
+  line-height:1.5;
+
+  color:rgba(255,255,255,.7);
+}
+
+
+/* =========================================================
+   КНОПКА ПОВТОРЕНИЯ
+========================================================= */
+
+.replay{
+  position:fixed;
+
+  bottom:25px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  opacity:0;
+
+  pointer-events:none;
+}
+
+
+/* =========================================================
+   КЛАССЫ
+========================================================= */
+
+.show{
+  opacity:1!important;
+}
+
+.hide{
+  opacity:0!important;
+
+  transform:translateY(-12px)!important;
+
+  pointer-events:none!important;
+}
+
+
+/* =========================================================
+   ПРОГРЕСС
+========================================================= */
+
+.progress{
+  position:fixed;
+
+  left:50%;
+  bottom:55px;
+
+  transform:translateX(-50%);
+
+  width:min(260px,70vw);
+
+  height:2px;
+
+  background:rgba(255,255,255,.1);
+
+  border-radius:999px;
+
+  overflow:hidden;
+
+  opacity:0;
+
+  transition:opacity .5s;
+
+  pointer-events:none;
+}
+
+.progressBar{
+  width:0%;
+
+  height:100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(201,183,255,.3),
+      rgba(255,214,238,.95)
+    );
+
+  box-shadow:
+    0 0 12px rgba(255,214,238,.6);
+
+  transition:width .15s linear;
+}
+
+
+/* =========================================================
+   ТЕЛЕФОНЫ
+========================================================= */
+
+@media(max-width:600px){
+
+  .ui{
+    padding:18px;
+  }
+
+  .sub{
+    max-width:340px;
+
+    margin-top:18px;
+    margin-bottom:24px;
+  }
+
+  .hint{
+    bottom:20px;
+
+    font-size:9px;
+
+    letter-spacing:.1em;
+
+    max-width:90vw;
+
+    text-align:center;
+  }
+
+  .message{
+    top:78%;
+
+    width:calc(100% - 28px);
+  }
+
+  .message .small{
+    font-size:9px;
+
+    margin-bottom:9px;
+  }
+
+  .message h2{
+    font-size:clamp(23px,7vw,34px);
+  }
+
+  .message p{
+    font-size:14px;
+
+    margin-top:10px;
+  }
+
+  button{
+    padding:13px 20px;
+  }
+
+  .progress{
+    bottom:52px;
+
+    width:min(220px,68vw);
+  }
+
+  .replay{
+    bottom:15px;
+  }
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     CANVAS
+========================================================= -->
+
+<canvas id="stars"></canvas>
+
+<div class="vignette"></div>
+
+
+<!-- =========================================================
+     НАЧАЛЬНЫЙ ЭКРАН
+========================================================= -->
+
+<div class="ui">
+
+  <div class="intro" id="intro">
+
+    <div class="kicker">
+      для тебя
+    </div>
+
+    <h1>
+      Ты — моё<br>
+      созвездие
+    </h1>
+
+    <div class="sub">
+      Среди тысяч звёзд есть одна,
+      которую я всегда узнаю.
+      Попробуй собрать её.
+    </div>
+
+    <button id="start">
+      Собрать созвездие ✦
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     ПОДСКАЗКА
+========================================================= -->
+
+<div class="hint" id="hint">
+  двигай мышью или пальцем по экрану
+</div>
+
+
+<!-- =========================================================
+     ПРОГРЕСС
+========================================================= -->
+
+<div class="progress" id="progress">
+
+  <div
+    class="progressBar"
+    id="progressBar"
+  ></div>
+
+</div>
+
+
+<!-- =========================================================
+     ФИНАЛЬНОЕ СООБЩЕНИЕ
+========================================================= -->
+
+<div class="message" id="message">
+
+  <div class="small">
+    созвездие найдено
+  </div>
+
+  <h2>
+    Среди миллионов огней<br>
+    я всё равно нахожу тебя.
+  </h2>
+
+</div>
+
+
+<!-- =========================================================
+     ПОВТОР
+========================================================= -->
+
+<button
+  class="replay"
+  id="replay"
+>
+  Собрать снова
+</button>
+
+
+<script>
+
+
+/* =========================================================
+   НАСТРОЙКИ
+========================================================= */
+
+
+/*
+  ФОТОГРАФИЯ
+
+  Структура:
+
+  папка проекта/
+  │
+  ├── index.html
+  │
+  └── image/
+      └── 12.jpg
+*/
+
+const PHOTO =
+  "./image/12.jpg";
+
+
+/*
+  Максимальное количество точек фотографии.
+*/
+
+const MAX_PHOTO_STARS =
+  1000000;
+
+
+/*
+  Сколько движения нужно сделать
+  мышью или пальцем.
+
+  Чем меньше число —
+  тем быстрее собирается фотография.
+*/
+
+const MOVEMENT_REQUIRED =
+  9000;
+
+
+/*
+  Размер фотографии относительно экрана.
+*/
+
+const PHOTO_SCREEN_SIZE =
+  0.88;
+
+
+/*
+  Минимальный размер звезды.
+*/
+
+const MIN_STAR_SIZE =
+  0.28;
+
+
+/*
+  Максимальный размер звезды.
+*/
+
+const MAX_STAR_SIZE =
+  1.55;
+
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+const canvas =
+  document.getElementById("stars");
+
+const ctx =
+  canvas.getContext(
+    "2d",
+    {
+      alpha:false
+    }
+  );
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+const startBtn =
+  document.getElementById("start");
+
+const replayBtn =
+  document.getElementById("replay");
+
+const intro =
+  document.getElementById("intro");
+
+const hint =
+  document.getElementById("hint");
+
+const message =
+  document.getElementById("message");
+
+const progressElement =
+  document.getElementById("progress");
+
+const progressBar =
+  document.getElementById("progressBar");
+
+
+/* =========================================================
+   РАЗМЕРЫ
+========================================================= */
+
+let W =
+  window.innerWidth;
+
+let H =
+  window.innerHeight;
+
+let DPR =
+  Math.min(
+    window.devicePixelRatio || 1,
+    2
+  );
+
+
+/* =========================================================
+   СОСТОЯНИЕ
+========================================================= */
+
+let mode =
+  "idle";
+
+
+/*
+  Возможные состояния:
+
+  idle
+  waiting
+  forming
+  formed
+*/
+
+
+/* =========================================================
+   ПРОГРЕСС
+========================================================= */
+
+let progress =
+  0;
+
+
+/* =========================================================
+   ДВИЖЕНИЕ
+========================================================= */
+
+let movement =
+  0;
+
+let lastPointerX =
+  null;
+
+let lastPointerY =
+  null;
+
+let lastMovementTime =
+  0;
+
+
+/* =========================================================
+   АНИМАЦИЯ
+========================================================= */
+
+let pulse =
+  0;
+
+let lastTime =
+  performance.now();
+
+
+/* =========================================================
+   ЧАСТИЦЫ
+========================================================= */
+
+let particles =
+  [];
+
+let photoPoints =
+  [];
+
+
+/* =========================================================
+   POINTER
+========================================================= */
+
+const pointer = {
+
+  x:-9999,
+
+  y:-9999,
+
+  active:false
+
+};
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+const img =
+  new Image();
+
+img.decoding =
+  "async";
+
+
+/* =========================================================
+   RANDOM
+========================================================= */
+
+function rand(a,b){
+
+  return a +
+    Math.random() *
+    (b-a);
+
+}
+
+
+/* =========================================================
+   CLAMP
+========================================================= */
+
+function clamp(v,a,b){
+
+  return Math.max(
+    a,
+    Math.min(
+      b,
+      v
+    )
+  );
+
+}
+
+
+/* =========================================================
+   EASING
+========================================================= */
+
+function easeOutCubic(t){
+
+  return 1 -
+    Math.pow(
+      1-t,
+      3
+    );
+
+}
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+function resize(){
+
+  W =
+    window.innerWidth;
+
+  H =
+    window.innerHeight;
+
+  DPR =
+    Math.min(
+      window.devicePixelRatio || 1,
+      2
+    );
+
+  canvas.width =
+    Math.floor(
+      W * DPR
+    );
+
+  canvas.height =
+    Math.floor(
+      H * DPR
+    );
+
+  canvas.style.width =
+    W + "px";
+
+  canvas.style.height =
+    H + "px";
+
+  ctx.setTransform(
+    DPR,
+    0,
+    0,
+    DPR,
+    0,
+    0
+  );
+
+
+  /*
+    Если фотография уже загружена —
+    пересобираем точки.
+
+    Но частицы создаём только тогда,
+    когда они действительно нужны.
+  */
+
+  if(
+    img.complete &&
+    img.naturalWidth
+  ){
+
+    buildPhotoPoints();
+
+  }
+
+}
+
+
+window.addEventListener(
+  "resize",
+  resize
+);
+
+
+/* =========================================================
+   ЗАГРУЗКА ФОТОГРАФИИ
+========================================================= */
+
+img.onload =
+  function(){
+
+    console.log(
+      "Фотография загружена:",
+      img.naturalWidth,
+      "x",
+      img.naturalHeight
+    );
+
+    buildPhotoPoints();
+
+  };
+
+
+img.onerror =
+  function(){
+
+    console.error(
+      "ОШИБКА ЗАГРУЗКИ ФОТО:",
+      PHOTO
+    );
+
+  };
+
+
+img.src =
+  PHOTO;
+
+
+/* =========================================================
+   СОЗДАНИЕ ТОЧЕК ФОТОГРАФИИ
+========================================================= */
+
+function buildPhotoPoints(){
+
+  if(
+    !img.complete ||
+    !img.naturalWidth
+  ){
+
+    return;
+
+  }
+
+
+  /*
+    Размер фотографии.
+  */
+
+  const maxW =
+    Math.min(
+      W * PHOTO_SCREEN_SIZE,
+      1100
+    );
+
+  const maxH =
+    Math.min(
+      H * PHOTO_SCREEN_SIZE,
+      1100
+    );
+
+
+  const iw =
+    img.naturalWidth;
+
+  const ih =
+    img.naturalHeight;
+
+
+  /*
+    Сохраняем пропорции.
+  */
+
+  const scale =
+    Math.min(
+      maxW / iw,
+      maxH / ih
+    );
+
+
+  const dw =
+    Math.max(
+      1,
+      Math.floor(
+        iw * scale
+      )
+    );
+
+
+  const dh =
+    Math.max(
+      1,
+      Math.floor(
+        ih * scale
+      )
+    );
+
+
+  /*
+    OFFSCREEN CANVAS
+  */
+
+  const off =
+    document.createElement(
+      "canvas"
+    );
+
+  off.width =
+    dw;
+
+  off.height =
+    dh;
+
+
+  const octx =
+    off.getContext(
+      "2d",
+      {
+        willReadFrequently:true
+      }
+    );
+
+
+  octx.drawImage(
+    img,
+    0,
+    0,
+    dw,
+    dh
+  );
+
+
+  /*
+    Получаем пиксели.
+  */
+
+  const data =
+    octx.getImageData(
+      0,
+      0,
+      dw,
+      dh
+    ).data;
+
+
+  /*
+    Вычисляем шаг.
+  */
+
+  let step =
+    Math.sqrt(
+      (
+        dw * dh
+      ) /
+      MAX_PHOTO_STARS
+    );
+
+
+  step =
+    Math.max(
+      1,
+      step
+    );
+
+
+  /*
+    На небольших фотографиях
+    используем каждый пиксель.
+  */
+
+  if(
+    dw * dh < 700000
+  ){
+
+    step = 1;
+
+  }
+
+
+  /*
+    Точки фотографии.
+  */
+
+  const points =
+    [];
+
+
+  for(
+    let y=0;
+    y<dh;
+    y+=step
+  ){
+
+    for(
+      let x=0;
+      x<dw;
+      x+=step
+    ){
+
+      const px =
+        Math.floor(x);
+
+      const py =
+        Math.floor(y);
+
+
+      const index =
+        (
+          py * dw +
+          px
+        ) * 4;
+
+
+      const r =
+        data[index];
+
+      const g =
+        data[index+1];
+
+      const b =
+        data[index+2];
+
+      const alpha =
+        data[index+3];
+
+
+      if(
+        alpha < 10
+      ){
+
+        continue;
+
+      }
+
+
+      /*
+        Яркость.
+      */
+
+      const lum =
+        (
+          .299*r +
+          .587*g +
+          .114*b
+        );
+
+
+      const brightness =
+        lum / 255;
+
+
+      /*
+        Контраст.
+      */
+
+      const contrast =
+        clamp(
+          (
+            brightness -
+            .5
+          ) * 1.85 +
+          .5,
+          0,
+          1
+        );
+
+
+      /*
+        Размер звезды.
+      */
+
+      const size =
+        clamp(
+          MIN_STAR_SIZE +
+          (
+            1 -
+            contrast
+          ) * 1.15,
+          MIN_STAR_SIZE,
+          MAX_STAR_SIZE
+        );
+
+
+      /*
+        Прозрачность.
+      */
+
+      const alphaStar =
+        clamp(
+          .48 +
+          (
+            1 -
+            contrast
+          ) * .5,
+          .46,
+          1
+        );
+
+
+      points.push({
+
+        x:
+          W/2 -
+          dw/2 +
+          x,
+
+        y:
+          H/2 -
+          dh/2 +
+          y,
+
+        r:
+          size,
+
+        alpha:
+          alphaStar,
+
+        lum:
+          lum
+
+      });
+
+    }
+
+  }
+
+
+  /*
+    Ограничиваем количество.
+  */
+
+  if(
+    points.length >
+    MAX_PHOTO_STARS
+  ){
+
+    const result =
+      new Array(
+        MAX_PHOTO_STARS
+      );
+
+
+    const ratio =
+      points.length /
+      MAX_PHOTO_STARS;
+
+
+    for(
+      let i=0;
+      i<MAX_PHOTO_STARS;
+      i++
+    ){
+
+      const index =
+        Math.floor(
+          i * ratio
+        );
+
+
+      result[i] =
+        points[index];
+
+    }
+
+
+    photoPoints =
+      result;
+
+  }
+  else{
+
+    photoPoints =
+      points;
+
+  }
+
+
+  console.log(
+    "ИТОГО ТОЧЕК ФОТО:",
+    photoPoints.length
+  );
+
+
+  /*
+    ВАЖНО:
+
+    Здесь больше НЕ создаём частицы.
+
+    Они будут созданы только после
+    нажатия кнопки "Собрать".
+  */
+
+}
+
+
+/* =========================================================
+   СОЗДАНИЕ ЧАСТИЦ ПОСЛЕ НАЖАТИЯ
+========================================================= */
+
+function createParticles(){
+
+  particles = [];
+
+
+  /*
+    ========================================================
+    ФОТОГРАФИЯ
+    ========================================================
+  */
+
+  for(
+    let i=0;
+    i<photoPoints.length;
+    i++
+  ){
+
+    const p =
+      photoPoints[i];
+
+
+    /*
+      ======================================================
+      САМОЕ ГЛАВНОЕ ИЗМЕНЕНИЕ
+
+      Звезда появляется
+      с края экрана.
+
+      То есть теперь они идут
+      действительно со всех сторон.
+      ======================================================
+    */
+
+    let startX;
+    let startY;
+
+
+    const side =
+      Math.floor(
+        Math.random() * 4
+      );
+
+
+    /*
+      Левая сторона.
+    */
+
+    if(side === 0){
+
+      startX =
+        rand(
+          -120,
+          -20
+        );
+
+      startY =
+        Math.random() * H;
+
+    }
+
+
+    /*
+      Правая сторона.
+    */
+
+    else if(side === 1){
+
+      startX =
+        rand(
+          W + 20,
+          W + 120
+        );
+
+      startY =
+        Math.random() * H;
+
+    }
+
+
+    /*
+      Верх.
+    */
+
+    else if(side === 2){
+
+      startX =
+        Math.random() * W;
+
+      startY =
+        rand(
+          -120,
+          -20
+        );
+
+    }
+
+
+    /*
+      Низ.
+    */
+
+    else{
+
+      startX =
+        Math.random() * W;
+
+      startY =
+        rand(
+          H + 20,
+          H + 120
+        );
+
+    }
+
+
+    particles.push({
+
+      x:startX,
+
+      y:startY,
+
+      startX:startX,
+
+      startY:startY,
+
+      targetX:p.x,
+
+      targetY:p.y,
+
+      r:p.r,
+
+      imageAlpha:p.alpha,
+
+      lum:p.lum,
+
+      tw:
+        rand(
+          0,
+          Math.PI*2
+        ),
+
+      speed:
+        rand(
+          .4,
+          1.6
+        ),
+
+      type:"photo"
+
+    });
+
+  }
+
+
+  /*
+    ========================================================
+    ФОНОВЫЕ ЗВЁЗДЫ
+
+    Они тоже появляются только
+    после нажатия кнопки.
+    ========================================================
+  */
+
+  const bgCount =
+    Math.min(
+      1800,
+      Math.floor(
+        W * H / 850
+      )
+    );
+
+
+  for(
+    let i=0;
+    i<bgCount;
+    i++
+  ){
+
+    particles.push({
+
+      x:
+        Math.random()*W,
+
+      y:
+        Math.random()*H,
+
+      r:
+        rand(
+          .2,
+          1.15
+        ),
+
+      a:
+        rand(
+          .08,
+          .58
+        ),
+
+      tw:
+        rand(
+          0,
+          Math.PI*2
+        ),
+
+      speed:
+        rand(
+          .2,
+          1.15
+        ),
+
+      type:"bg"
+
+    });
+
+  }
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+function start(){
+
+  if(
+    !photoPoints.length
+  ){
+
+    console.warn(
+      "Фотография ещё не готова."
+    );
+
+    return;
+
+  }
+
+
+  mode =
+    "waiting";
+
+
+  progress =
+    0;
+
+
+  movement =
+    0;
+
+
+  lastPointerX =
+    null;
+
+  lastPointerY =
+    null;
+
+
+  /*
+    ВОТ ЗДЕСЬ появляются звёзды.
+
+    До этого момента particles = [].
+  */
+
+  createParticles();
+
+
+  /*
+    Убираем начальный экран.
+  */
+
+  intro.classList.add(
+    "hide"
+  );
+
+
+  message.classList.remove(
+    "show"
+  );
+
+
+  replayBtn.classList.remove(
+    "show"
+  );
+
+
+  hint.textContent =
+    "двигай мышью или пальцем по экрану";
+
+
+  hint.classList.add(
+    "show"
+  );
+
+
+  /*
+    Полоску НЕ убираем.
+  */
+
+  progressElement.style.opacity =
+    "1";
+
+
+  progressBar.style.width =
+    "0%";
+
+}
+
+
+/* =========================================================
+   REPLAY
+========================================================= */
+
+function replay(){
+
+  mode =
+    "idle";
+
+
+  progress =
+    0;
+
+
+  movement =
+    0;
+
+
+  lastPointerX =
+    null;
+
+  lastPointerY =
+    null;
+
+
+  pointer.active =
+    false;
+
+
+  /*
+    Убираем все частицы.
+
+    Поэтому после повторного нажатия
+    до кнопки снова нет миллиона звёзд.
+  */
+
+  particles = [];
+
+
+  intro.classList.remove(
+    "hide"
+  );
+
+
+  message.classList.remove(
+    "show"
+  );
+
+
+  replayBtn.classList.remove(
+    "show"
+  );
+
+
+  hint.classList.remove(
+    "show"
+  );
+
+
+  progressElement.style.opacity =
+    "0";
+
+
+  progressBar.style.width =
+    "0%";
+
+}
+
+
+/* =========================================================
+   КНОПКИ
+========================================================= */
+
+startBtn.addEventListener(
+  "click",
+  start
+);
+
+
+replayBtn.addEventListener(
+  "click",
+  replay
+);
+
+
+/* =========================================================
+   ОБРАБОТКА ДВИЖЕНИЯ
+========================================================= */
+
+function setPointer(
+  x,
+  y
+){
+
+  /*
+    Первое касание/движение
+    только запоминает позицию.
+
+    Само расстояние начинается
+    со следующего движения.
+  */
+
+  if(
+    lastPointerX === null ||
+    lastPointerY === null
+  ){
+
+    lastPointerX =
+      x;
+
+    lastPointerY =
+      y;
+
+    pointer.x =
+      x;
+
+    pointer.y =
+      y;
+
+    pointer.active =
+      true;
+
+    return;
+
+  }
+
+
+  /*
+    Расстояние движения.
+  */
+
+  const dx =
+    x -
+    lastPointerX;
+
+  const dy =
+    y -
+    lastPointerY;
+
+
+  const distance =
+    Math.hypot(
+      dx,
+      dy
+    );
+
+
+  /*
+    ВАЖНО:
+
+    Теперь движение засчитывается
+    независимо от того, где находится
+    мышь или палец.
+
+    Можно водить по ЛЮБОЙ части экрана.
+  */
+
+  if(
+    mode === "waiting" ||
+    mode === "forming"
+  ){
+
+    if(
+      distance > .5
+    ){
+
+      movement +=
+        distance;
+
+
+      progress =
+        clamp(
+          movement /
+          MOVEMENT_REQUIRED,
+          0,
+          1
+        );
+
+
+      mode =
+        "forming";
+
+
+      /*
+        Обновляем полоску.
+      */
+
+      progressBar.style.width =
+        (
+          progress * 100
+        ) + "%";
+
+
+      /*
+        Завершение.
+      */
+
+      if(
+        progress >= 1
+      ){
+
+        finish();
+
+      }
+
+    }
+
+  }
+
+
+  pointer.x =
+    x;
+
+  pointer.y =
+    y;
+
+  pointer.active =
+    true;
+
+
+  lastPointerX =
+    x;
+
+  lastPointerY =
+    y;
+
+
+  lastMovementTime =
+    performance.now();
+
+}
+
+
+/* =========================================================
+   MOUSE
+========================================================= */
+
+/*
+  ВАЖНО:
+
+  Слушаем движение НЕ на canvas,
+  а на window.
+
+  Поэтому движение засчитывается
+  по всей странице.
+*/
+
+window.addEventListener(
+  "mousemove",
+  function(e){
+
+    setPointer(
+      e.clientX,
+      e.clientY
+    );
+
+  }
+);
+
+
+/* =========================================================
+   MOUSE LEAVE
+========================================================= */
+
+window.addEventListener(
+  "mouseleave",
+  function(){
+
+    pointer.active =
+      false;
+
+    lastPointerX =
+      null;
+
+    lastPointerY =
+      null;
+
+  }
+);
+
+
+/* =========================================================
+   TOUCH START
+========================================================= */
+
+window.addEventListener(
+  "touchstart",
+  function(e){
+
+    const t =
+      e.touches[0];
+
+
+    if(!t){
+
+      return;
+
+    }
+
+
+    setPointer(
+      t.clientX,
+      t.clientY
+    );
+
+  },
+  {
+    passive:true
+  }
+);
+
+
+/* =========================================================
+   TOUCH MOVE
+========================================================= */
+
+window.addEventListener(
+  "touchmove",
+  function(e){
+
+    const t =
+      e.touches[0];
+
+
+    if(!t){
+
+      return;
+
+    }
+
+
+    setPointer(
+      t.clientX,
+      t.clientY
+    );
+
+  },
+  {
+    passive:true
+  }
+);
+
+
+/* =========================================================
+   TOUCH END
+========================================================= */
+
+window.addEventListener(
+  "touchend",
+  function(){
+
+    pointer.active =
+      false;
+
+    lastPointerX =
+      null;
+
+    lastPointerY =
+      null;
+
+  },
+  {
+    passive:true
+  }
+);
+
+
+/* =========================================================
+   ЗАВЕРШЕНИЕ
+========================================================= */
+
+function finish(){
+
+  if(
+    mode === "formed"
+  ){
+
+    return;
+
+  }
+
+
+  mode =
+    "formed";
+
+
+  progress =
+    1;
+
+
+  progressBar.style.width =
+    "100%";
+
+
+  hint.textContent =
+    "проведи пальцем по звёздам";
+
+
+  /*
+    Показываем финальный текст.
+  */
+
+  setTimeout(
+    function(){
+
+      message.classList.add(
+        "show"
+      );
+
+      replayBtn.classList.add(
+        "show"
+      );
+
+    },
+    700
+  );
+
+}
+
+
+/* =========================================================
+   DRAW
+========================================================= */
+
+function draw(t){
+
+  const dt =
+    Math.min(
+      40,
+      t -
+      lastTime
+    );
+
+
+  lastTime =
+    t;
+
+
+  /*
+    ========================================================
+    ФОН
+    ========================================================
+  */
+
+  ctx.fillStyle =
+    "#030611";
+
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+
+  /*
+    ========================================================
+    ЦЕНТРАЛЬНОЕ СВЕЧЕНИЕ
+    ========================================================
+  */
+
+  const glow =
+    ctx.createRadialGradient(
+      W*.5,
+      H*.45,
+      0,
+      W*.5,
+      H*.45,
+      Math.max(W,H)*.75
+    );
+
+
+  glow.addColorStop(
+    0,
+    "rgba(87,63,130,.18)"
+  );
+
+
+  glow.addColorStop(
+    .42,
+    "rgba(45,30,75,.08)"
+  );
+
+
+  glow.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+  );
+
+
+  ctx.fillStyle =
+    glow;
+
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+
+  /*
+    ========================================================
+    АНИМАЦИЯ
+    ========================================================
+  */
+
+  pulse +=
+    dt * .001;
+
+
+  /*
+    ========================================================
+    ЧАСТИЦЫ
+
+    ДО НАЖАТИЯ particles = []
+
+    Поэтому здесь ничего не рисуется.
+    ========================================================
+  */
+
+  for(
+    const p of particles
+  ){
+
+    let x;
+
+    let y;
+
+    let alpha;
+
+
+    /*
+      ======================================================
+      ФОТОГРАФИЯ
+      ======================================================
+    */
+
+    if(
+      p.type === "photo"
+    ){
+
+      /*
+        Пока пользователь ещё не начал движение,
+        звёзды находятся по краям/летят к экрану,
+        но фотография ещё не собирается.
+      */
+
+      if(
+        mode === "waiting"
+      ){
+
+        x =
+          p.startX;
+
+        y =
+          p.startY;
+
+
+        /*
+          Они уже видны,
+          но ещё не начали собираться.
+        */
+
+        alpha =
+          p.imageAlpha * .75;
+
+      }
+
+      else{
+
+        /*
+          ==================================================
+          ФОРМИРОВАНИЕ
+          ==================================================
+        */
+
+        const ep =
+          easeOutCubic(
+            progress
+          );
+
+
+        /*
+          Полёт от края экрана
+          к фотографии.
+        */
+
+        x =
+          p.startX +
+          (
+            p.targetX -
+            p.startX
+          ) * ep;
+
+
+        y =
+          p.startY +
+          (
+            p.targetY -
+            p.startY
+          ) * ep;
+
+
+        /*
+          Космическое рассеивание.
+        */
+
+        const scatter =
+          1 -
+          ep;
+
+
+        x +=
+          Math.sin(
+            p.tw +
+            pulse*p.speed
+          ) *
+          18 *
+          scatter;
+
+
+        y +=
+          Math.cos(
+            p.tw*.8 +
+            pulse*p.speed
+          ) *
+          18 *
+          scatter;
+
+
+        /*
+          Яркость.
+        */
+
+        alpha =
+          p.imageAlpha *
+          (
+            .12 +
+            .88*ep
+          );
+
+
+        /*
+          ==================================================
+          РЕАКЦИЯ НА ПАЛЕЦ ПОСЛЕ СБОРКИ
+          ==================================================
+        */
+
+        if(
+          mode === "formed" &&
+          pointer.active
+        ){
+
+          const dx =
+            x -
+            pointer.x;
+
+
+          const dy =
+            y -
+            pointer.y;
+
+
+          const distance =
+            Math.hypot(
+              dx,
+              dy
+            );
+
+
+          const radius =
+            130;
+
+
+          if(
+            distance < radius &&
+            distance > .01
+          ){
+
+            const force =
+              (
+                1 -
+                distance/radius
+              ) *
+              48;
+
+
+            x +=
+              dx /
+              distance *
+              force;
+
+
+            y +=
+              dy /
+              distance *
+              force;
+
+          }
+
+        }
+
+      }
+
+    }
+
+
+    /*
+      ======================================================
+      ФОНОВЫЕ ЗВЁЗДЫ
+      ======================================================
+    */
+
+    else{
+
+      x =
+        p.x +
+        Math.sin(
+          p.tw +
+          pulse*p.speed
+        ) * 2.2;
+
+
+      y =
+        p.y +
+        Math.cos(
+          p.tw*.8 +
+          pulse*p.speed
+        ) * 2.2;
+
+
+      alpha =
+        p.a;
+
+    }
+
+
+    /*
+      ======================================================
+      МЕРЦАНИЕ
+      ======================================================
+    */
+
+    const twinkle =
+      .72 +
+      .28 *
+      Math.sin(
+        p.tw +
+        pulse *
+        p.speed *
+        2
+      );
+
+
+    alpha *=
+      twinkle;
+
+
+    /*
+      ======================================================
+      РАЗМЕР
+      ======================================================
+    */
+
+    let radius =
+      p.r;
+
+
+    if(
+      p.type === "photo"
+    ){
+
+      if(
+        mode !== "formed"
+      ){
+
+        const ep =
+          easeOutCubic(
+            progress
+          );
+
+
+        radius *=
+          1 +
+          .25 *
+          (
+            1 -
+            ep
+          );
+
+      }
+
+    }
+
+
+    /*
+      ======================================================
+      ЦВЕТ
+      ======================================================
+    */
+
+    const red =
+      255;
+
+
+    const green =
+      216 +
+      Math.floor(
+        30 *
+        twinkle
+      );
+
+
+    const blue =
+      236 +
+      Math.floor(
+        19 *
+        twinkle
+      );
+
+
+    /*
+      ======================================================
+      РИСОВАНИЕ
+      ======================================================
+    */
+
+    ctx.beginPath();
+
+
+    ctx.fillStyle =
+      `rgba(
+        ${red},
+        ${green},
+        ${blue},
+        ${alpha}
+      )`;
+
+
+    if(
+      radius > 1
+    ){
+
+      ctx.shadowBlur =
+        4;
+
+    }
+
+    else{
+
+      ctx.shadowBlur =
+        0;
+
+    }
+
+
+    ctx.shadowColor =
+      "rgba(255,215,242,.8)";
+
+
+    ctx.arc(
+      x,
+      y,
+      radius,
+      0,
+      Math.PI*2
+    );
+
+
+    ctx.fill();
+
+  }
+
+
+  ctx.shadowBlur =
+    0;
+
+
+  /*
+    ========================================================
+    ФИНАЛЬНАЯ НАДПИСЬ НА CANVAS
+    ========================================================
+  */
+
+  if(
+    mode === "formed"
+  ){
+
+    const a =
+      clamp(
+        (
+          progress -
+          .72
+        ) * 3.5,
+        0,
+        1
+      );
+
+
+    ctx.font =
+      "12px Arial";
+
+
+    ctx.textAlign =
+      "center";
+
+
+    ctx.fillStyle =
+      `rgba(
+        255,
+        255,
+        255,
+        ${.42*a}
+      )`;
+
+
+    ctx.fillText(
+      "проведи пальцем по звёздам",
+      W/2,
+      H-25
+    );
+
+  }
+
+
+  requestAnimationFrame(
+    draw
+  );
+
+}
+
+
+/* =========================================================
+   ЗАПУСК
+========================================================= */
+
+resize();
+
+
+/*
+  ВАЖНО:
+
+  Здесь мы НЕ вызываем makeBackground()
+  и НЕ создаём фоновые звёзды.
+
+  До нажатия кнопки canvas будет
+  практически полностью пустым.
+*/
+
+
+requestAnimationFrame(
+  draw
+);
+
+</script>
+
+</body>
+</html>
